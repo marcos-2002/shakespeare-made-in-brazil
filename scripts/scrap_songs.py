@@ -8,6 +8,14 @@ def get_soup(link):
     soup = BeautifulSoup(page.content, 'html.parser')
     return soup
 
+def replace_bad_char(string) -> str:
+    bad_char = ['\\','/','?']
+    new_string = list(string)
+    for i, c in enumerate(new_string):
+        if c in bad_char:
+            new_string[i] = ' '
+    return ''.join(new_string)
+
 #Dicionário com {musica: link}
 def scrap_links_musicas(artista) -> dict:
     link = f'https://www.letras.mus.br/{artista}/mais_acessadas.html'
@@ -32,17 +40,22 @@ def create_text_file(folder_name,file_name,file_content):
     file_path = os.path.join(folder_path, f'{file_name}.txt')
     with open(file_path, "w") as file:
         file.write(file_content)
-    
+
 def download_musicas(artist):
     links_dict = scrap_links_musicas(artist)
+    downloaded = 0
     for song_title in links_dict:
-        folder_name = f'musicas/{artist}'
-        file_name = song_title.replace('/',' ')#Path não pode ter "/" indevidamente
+        folder_name = f'musicas\\{artist}'
+        file_name = replace_bad_char(song_title)
         song_lyric = scrap_letra_musica(links_dict[song_title])
         #só salvar se a música estiver em portugês
         if detect(song_lyric) == 'pt':
             create_text_file(folder_name, file_name, song_lyric)
-            
+            downloaded += 1
+        else:
+            print (f'"{song_title}" não foi salva pois não está em português.')
+    print (f'{downloaded} músicas foram salvas')
+
 if __name__ == '__main__':
     artist = input('Artista: ')
     download_musicas(artist)
