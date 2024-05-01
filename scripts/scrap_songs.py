@@ -32,7 +32,7 @@ def scrap_links_musicas(artista) -> dict:
 def scrap_letra_musica(link) -> str:
     soup = get_soup(link)
     song_lyric = soup.find(class_="lyric-original").get_text(separator="\n")
-    return song_lyric
+    return song_lyric[2:]#índice para ignorar o primeiro espaço em branco ' \n'
 
 def download_musicas(artist):
     links_dict = scrap_links_musicas(artist)
@@ -51,7 +51,7 @@ def download_musicas(artist):
         if detect(song_lyric) != 'pt':
             print (f'"{song_title}" não foi salva pois não está em português.')
             continue
-        with open(file_path, "w") as file:
+        with open(file_path, "w", encoding="utf-8") as file:
             print (f'Salvando "{song_title}"')
             file.write(song_lyric)
         downloaded += 1
