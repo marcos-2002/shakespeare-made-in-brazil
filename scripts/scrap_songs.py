@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from langdetect import detect
 
 def get_soup(link):
-    page = requests.get(link)# talvez precise usar 'verify=False' por conta de um 'SSL certificate error'
+    page = requests.get(link)
     soup = BeautifulSoup(page.content, 'html.parser')
     return soup
 
@@ -20,7 +20,6 @@ def replace_bad_char(string) -> str:
 def scrap_links_musicas(artista) -> dict:
     link = f'https://www.letras.mus.br/{artista}/mais_acessadas.html'
     soup = get_soup(link)
-    #Talvez dê pra usar só uma função de find
     song_table = soup.find(class_="songList-table").find_all('li')
     links_dict = {}
     for song in song_table:
@@ -44,18 +43,20 @@ def download_musicas(artist):
         file_name = replace_bad_char(song_title)
         file_path = f'{folder_path}\\{file_name}.txt'
         if os.path.exists(file_path):
-            print (f'"{file_name}" já existe')
+            print (f'"{file_name}" não salva. Arquivo já existe')
             continue
         song_lyric = scrap_letra_musica(links_dict[song_title])
-        #só salvar se a música estiver em portugês
+        if not (song_lyric):
+            print (f'"{file_name}" não salva. Música sem letra.')
+            continue
         if detect(song_lyric) != 'pt':
-            print (f'"{song_title}" não foi salva pois não está em português.')
+            print (f'"{file_name}" não salva. Música não está em português.')
             continue
         with open(file_path, "w", encoding="utf-8") as file:
-            print (f'Salvando "{song_title}"')
+            print (f'Salvando "{file_name}"')
             file.write(song_lyric)
         downloaded += 1
-    print (f'{downloaded} músicas foram salvas')
+    print (f'{downloaded} músicas salvas.')
 
 if __name__ == '__main__':
     artist = input('Artista: ')
