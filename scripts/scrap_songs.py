@@ -32,7 +32,7 @@ def scrap_links_musicas(artista) -> dict:
 def scrap_letra_musica(link) -> str:
     soup = get_soup(link)
     song_lyric = soup.find(class_="lyric-original").get_text(separator="\n")
-    return song_lyric[2:]#índice para ignorar o primeiro espaço em branco ' \n'
+    return song_lyric[2:-2]#índice para ignorar o primeiro e ultimo espaço em branco ' \n'
 
 def download_musicas(artist):
     links_dict = scrap_links_musicas(artist)
