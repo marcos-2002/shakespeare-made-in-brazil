@@ -9,7 +9,7 @@ def get_soup(link):
     return soup
 
 def replace_bad_char(string) -> str:
-    bad_char = ['\\','/','?']
+    bad_char = ['\\','/','?','"']
     new_string = list(string)
     for i, c in enumerate(new_string):
         if c in bad_char:
