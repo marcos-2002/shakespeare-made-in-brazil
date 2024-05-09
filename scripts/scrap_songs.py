@@ -22,10 +22,14 @@ def scrap_links_musicas(artista) -> dict:
     soup = get_soup(link)
     song_table = soup.find(class_="songList-table").find_all('li')
     links_dict = {}
+    cont = 0
     for song in song_table:
         song_title = song.get('data-name')
         song_link = song.get('data-shareurl')
         links_dict [song_title] = song_link
+        if cont == 200:
+            break
+        cont +=1
     return (links_dict)
 
 def scrap_letra_musica(link,paragraph_bool) -> str:
