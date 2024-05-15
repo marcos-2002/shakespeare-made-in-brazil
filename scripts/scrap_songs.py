@@ -2,6 +2,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from langdetect import detect
+from sklearn.model_selection import train_test_split
 
 def get_soup(link):
     page = requests.get(link)
@@ -49,7 +50,7 @@ def download_musicas(artist, paragraph_bool):
     os.makedirs(folder_path, exist_ok=True)
     for song_title in links_dict:
         file_name = replace_bad_char(song_title)
-        file_path = f'{folder_path}\\{file_name}.txt'
+        file_path = f'{folder_path}\\{file_name}.json'
         if os.path.exists(file_path):
             print (f'"{file_name}" não salva. Arquivo já existe')
             continue
@@ -97,8 +98,9 @@ def download_musicas_concat_json(artist, paragraph_bool):
     downloaded = 0
     folder_path = f'{os.getcwd()}\\musicas'
     os.makedirs(folder_path, exist_ok=True)
-    file_path = f'{folder_path}\\{artist}.txt'
-    if os.path.exists(file_path):
+    file_path_train = f'{folder_path}\\{artist}-train.json'
+    file_path_test = f'{folder_path}\\{artist}-test.json'
+    if os.path.exists(file_path_train):
         print (f'"{artist}.txt" não salvo. Arquivo já existe')
         return
     list_data = []
@@ -113,14 +115,20 @@ def download_musicas_concat_json(artist, paragraph_bool):
             continue
         list_data.append({"artist": artist, "song_title": song_title, "song_lyric": song_lyric})
         downloaded += 1
-
+    
+    list_data_train, list_data_test = train_test_split(list_data, test_size=0.2) #separa os dados de treino e teste
+    
     import json
-    json_data = json.dumps(list_data)
-    # aqui que eu devo alterar
-    with open(file_path, 'a', encoding='utf-8') as file:
-        file.write(f'{json_data}\n')
+    json_data_train = json.dumps(list_data_train)
+    json_data_test = json.dumps(list_data_test)
+    with open(file_path_train, 'a', encoding='utf-8') as file:
+        file.write(f'{json_data_train}\n')
         if paragraph_bool == True:
-            file.write(f'\n')      
+            file.write(f'\n')
+    with open(file_path_test, 'a', encoding='utf-8') as file:
+        file.write(f'{json_data_test}\n')
+        if paragraph_bool == True:
+            file.write(f'\n')     
     print (f'{downloaded} músicas salvas.')
 
 if __name__ == '__main__':
