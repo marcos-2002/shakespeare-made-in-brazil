@@ -92,6 +92,37 @@ def download_musicas_concat(artist, paragraph_bool):
         downloaded += 1
     print (f'{downloaded} músicas salvas.')
 
+def download_musicas_concat_json(artist, paragraph_bool):
+    links_dict = scrap_links_musicas(artist)
+    downloaded = 0
+    folder_path = f'{os.getcwd()}\\musicas'
+    os.makedirs(folder_path, exist_ok=True)
+    file_path = f'{folder_path}\\{artist}.txt'
+    if os.path.exists(file_path):
+        print (f'"{artist}.txt" não salvo. Arquivo já existe')
+        return
+    list_data = []
+    for song_title in links_dict:
+        file_name = replace_bad_char(song_title)
+        song_lyric = scrap_letra_musica(links_dict[song_title], paragraph_bool)
+        if not (song_lyric):
+            print (f'"{file_name}" não salva. Música sem letra.')
+            continue
+        if detect(song_lyric) != 'pt':
+            print (f'"{file_name}" não salva. Música não está em português.')
+            continue
+        list_data.append({"artist": artist, "song_title": song_title, "song_lyric": song_lyric})
+        downloaded += 1
+
+    import json
+    json_data = json.dumps(list_data)
+    # aqui que eu devo alterar
+    with open(file_path, 'a', encoding='utf-8') as file:
+        file.write(f'{json_data}\n')
+        if paragraph_bool == True:
+            file.write(f'\n')      
+    print (f'{downloaded} músicas salvas.')
+
 if __name__ == '__main__':
     artist = input('Artista: ')
     paragraph_bool = input('Parágrafos? (0 ou 1): ')
@@ -99,6 +130,6 @@ if __name__ == '__main__':
     concat_bool = input('Concatenar em 1 arquivo? (0 ou 1): ')
     concat_bool = False if (concat_bool=='0') else True
     if concat_bool == True:
-        download_musicas_concat(artist, paragraph_bool)
+        download_musicas_concat_json(artist, paragraph_bool)
     else:
         download_musicas(artist, paragraph_bool)
